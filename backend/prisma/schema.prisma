@@ -1,0 +1,122 @@
+// Prisma schema for No Dues Automation
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  department_code String    @id
+  name            String
+  head            String
+  students        Student[]
+}
+
+model Hostel {
+  hostel_no String    @id
+  name      String
+  warden    String?
+  students  Student[]
+}
+
+model CentralUnit {
+  unit_id   Int    @id @default(autoincrement())
+  unit_type String @unique
+}
+
+model Admin {
+  admin_id  Int             @id @default(autoincrement())
+  name      String
+  email     String          @unique
+  password  String
+  requests  NoDuesRequest[]
+  approvals FinalApproval[]
+}
+
+model Student {
+  student_id      String    @id
+  name            String
+  email           String    @unique
+  password        String
+  course          String?
+  admission_date  DateTime
+  passing_date    DateTime?
+  department_code String?
+  hostel_no       String?
+  request_id      Int?      @unique // ek hi request per student
+
+  department Department?    @relation(fields: [department_code], references: [department_code])
+  hostel     Hostel?        @relation(fields: [hostel_no], references: [hostel_no])
+  request    NoDuesRequest? // 👈 yaha fields/references hata diye
+  queries    Query[]
+}
+
+model Staff {
+  staff_id  Int     @id @default(autoincrement())
+  name      String
+  email     String
+  password  String
+  unit_type String // Department / Hostel / Library / Accounts / Sports / Proctor
+  unit_id   String? // flexible, not strict FK
+  tracks    Track[]
+}
+
+model NoDuesRequest {
+  request_id   Int      @id @default(autoincrement())
+  status       String   @default("Pending")
+  submitted_at DateTime @default(now())
+  student_id   String   @unique // ek request = ek student
+  admin_id     Int
+
+  student Student        @relation(fields: [student_id], references: [student_id])
+  admin   Admin          @relation(fields: [admin_id], references: [admin_id])
+  tracks  Track[]
+  final   FinalApproval?
+  queries Query[] // 👈 missing opposite relation added
+}
+
+model Query {
+  query_id       Int       @id @default(autoincrement())
+  student_id     String
+  request_id     Int
+  track_id       Int? // 👈 ab field define kar diya
+  approving_unit String
+  remarks        String
+  status         String    @default("Pending")
+  created_at     DateTime  @default(now())
+  resolved_at    DateTime?
+
+  student Student       @relation(fields: [student_id], references: [student_id])
+  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
+  track   Track?        @relation(fields: [track_id], references: [track_id]) // ab valid hai
+}
+
+model Track {
+  track_id    Int      @id @default(autoincrement())
+  unit_type   String
+  unit_id     String?
+  step_number Int
+  status      String   @default("Pending")
+  remarks     String?
+  updated_at  DateTime @default(now())
+  request_id  Int
+  staff_id    Int?
+
+  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
+  staff   Staff?        @relation(fields: [staff_id], references: [staff_id])
+  queries Query[] // 👈 now properly opposite of Query.track
+}
+
+model FinalApproval {
+  approval_id  Int      @id @default(autoincrement())
+  final_status String   @default("Pending")
+  issued_at    DateTime @default(now())
+  request_id   Int      @unique
+  admin_id     Int
+
+  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
+  admin   Admin         @relation(fields: [admin_id], references: [admin_id])
+}
