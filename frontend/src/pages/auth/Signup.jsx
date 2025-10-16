@@ -5,18 +5,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-  import { GraduationCap, Shield, Building2 } from "lucide-react"
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-  export default function Signup() {
+import { GraduationCap } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+export default function Signup() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
     studentId: "",
-    role: "student",
-    unit_type: ""
+    role: "",
+    unit_type: "",
+    hostelName: "",
   })
+
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const approvingUnits = [
     { value: "department", label: "Department" },
@@ -24,21 +29,55 @@ import { Label } from "@/components/ui/label"
     { value: "library", label: "Library" },
     { value: "accounts", label: "Accounts" },
     { value: "sports", label: "Sports" },
-    { value: "proctor", label: "Proctor" }
+    { value: "proctor", label: "Proctor" },
   ]
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+
+  const hostelList = [
+    "Hostel 01",
+    "Hostel 02",
+    "Hostel 03",
+    "Hostel 04",
+    "Hostel 05",
+    "Hostel 06",
+    "Hostel 07",
+    "Hostel 08",
+    "Hostel 09",
+    "Hostel 10A",
+    "Hostel 10B",
+    "Hostel 10C",
+    "Hostel 11",
+    "Hostel 12",
+  ]
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
+    if (!formData.role) {
+      alert("Please select a role")
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match")
       return
     }
 
+    if (formData.role === "student" && !formData.studentId) {
+      alert("Please enter your Student ID")
+      return
+    }
+
     if (formData.role === "unit" && !formData.unit_type) {
-      alert("Please select an approving unit")
+      alert("Please select an Approving Unit")
+      return
+    }
+
+    if (formData.unit_type === "hostel" && !formData.hostelName) {
+      alert("Please select which Hostel")
       return
     }
 
@@ -46,19 +85,10 @@ import { Label } from "@/components/ui/label"
 
     // Simulate API call
     setTimeout(() => {
-      // Here you would typically make an API call to register the user
-      // with all the form data including role and unit_type if applicable
-      console.log("Registering with data:", {
-        ...formData,
-        unit_type: formData.role === "unit" ? formData.unit_type : undefined
-      })
+      console.log("Registering user with data:", formData)
       navigate("/login")
       setIsLoading(false)
     }, 1000)
-  }
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -75,14 +105,34 @@ import { Label } from "@/components/ui/label"
               <GraduationCap className="h-8 w-8 text-primary" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
-              Create Student Account
+              Create Account
             </CardTitle>
             <CardDescription className="text-center">
-              Join NoDuesAutomation as a student
+              Join NoDuesAutomation by selecting your role
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Select Role */}
+              <div className="space-y-2">
+                <Label>Select Role</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => handleInputChange("role", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="unit">Approving Unit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Common Fields */}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -91,18 +141,6 @@ import { Label } from "@/components/ui/label"
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="studentId">Student ID</Label>
-                <Input
-                  id="studentId"
-                  type="text"
-                  placeholder="Enter your student ID"
-                  value={formData.studentId}
-                  onChange={(e) => handleInputChange("studentId", e.target.value)}
                   required
                 />
               </div>
@@ -143,21 +181,79 @@ import { Label } from "@/components/ui/label"
                 />
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              {/* Student Field */}
+              {formData.role === "student" && (
+                <div className="space-y-2">
+                  <Label htmlFor="studentId">Student ID</Label>
+                  <Input
+                    id="studentId"
+                    type="text"
+                    placeholder="Enter your student ID"
+                    value={formData.studentId}
+                    onChange={(e) => handleInputChange("studentId", e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Approving Unit Fields */}
+              {formData.role === "unit" && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Select Approving Unit</Label>
+                    <Select
+                      value={formData.unit_type}
+                      onValueChange={(value) => {
+                        handleInputChange("unit_type", value)
+                        handleInputChange("hostelName", "") // reset hostel when changing unit
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {approvingUnits.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Hostel-specific Field */}
+                  {formData.unit_type === "hostel" && (
+                    <div className="space-y-2">
+                      <Label>Select Hostel</Label>
+                      <Select
+                        value={formData.hostelName}
+                        onValueChange={(value) => handleInputChange("hostelName", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your hostel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hostelList.map((h) => (
+                            <SelectItem key={h} value={h}>
+                              {h}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Submit Button */}
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
             <div className="mt-6 text-center text-sm">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-primary hover:underline"
-              >
+              <Link to="/login" className="text-primary hover:underline">
                 Sign in
               </Link>
             </div>
