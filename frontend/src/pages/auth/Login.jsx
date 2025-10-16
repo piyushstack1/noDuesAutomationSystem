@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
+import logo from "@/images/logo.jpg"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -81,6 +82,9 @@ export default function Login() {
       >
         <Card className="shadow-xl">
           <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <img src={logo} alt="NoDuesAutomation Logo" className="h-16 w-auto" />
+            </div>
             <CardTitle className="text-2xl font-bold text-center">
               Welcome Back
             </CardTitle>

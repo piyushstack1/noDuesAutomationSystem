@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { GraduationCap } from "lucide-react"
+import { GraduationCap, Shield, Building2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import logo from "@/images/logo.jpg"
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -101,8 +102,8 @@ export default function Signup() {
       >
         <Card className="shadow-xl">
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-2">
-              <GraduationCap className="h-8 w-8 text-primary" />
+            <div className="flex items-center justify-center mb-4">
+              <img src={logo} alt="NoDuesAutomation Logo" className="h-16 w-auto" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
               Create Account
