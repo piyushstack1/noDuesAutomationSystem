@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ThemeToggle } from "@/components/ThemeToggle"
 import useAuthStore from "@/store/useAuthStore"
 import { useNavigate } from "react-router-dom"
 
@@ -47,8 +46,6 @@ export default function Navbar() {
           
           <nav className="flex items-center space-x-2">
             <NotificationBell />
-            
-            <ThemeToggle />
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
