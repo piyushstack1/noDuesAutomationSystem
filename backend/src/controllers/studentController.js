@@ -1,23 +1,141 @@
-import prisma from '../../../prisma/index.js';
+import prisma from "../../prisma/index.js";
 
-// Submit No Dues Form
-import prisma from "../../../prisma/index.js";
-
-// Submit No Dues Form
+// Submit No Dues Form with complete student details
 export const submitNoDuesForm = async (req, res) => {
     try {
-        const { student_id } = req.body;
+        const {
+            student_id,
+            studentName,
+            scholarNo,
+            department,
+            branch,
+            degree,
+            course,
+            mobileNo,
+            email,
+            hostelNo,
+            roomNo,
+            cgpa,
+            aadharPassport,
+            address,
+            bankAccountNo,
+            ifscCode,
+            isHosteler,
+            reason
+        } = req.body;
 
-        // Step 1: Find the single Admin (Administrative Dept.)
-        const admin = await prisma.admin.findFirst({
-            where: { role: "ADMIN" }   // <-- change condition as per your schema
-        });
+        // Get uploaded files
+        const profilePicture = req.files?.profilePicture?.[0];
+        const documents = req.files?.documents || [];
+
+        // Validate required fields
+        if (!student_id || !studentName || !email || !course) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        // Step 1: Find the Admin
+        const admin = await prisma.admin.findFirst();
 
         if (!admin) {
             return res.status(500).json({ error: "Admin not found in the system" });
         }
 
-        // Step 2: Check if student already has an active request
+        // Step 2: Check if student exists, if not create
+        let student = await prisma.student.findUnique({
+            where: { student_id }
+        });
+
+        if (!student) {
+            // Validate department exists if provided
+            if (department) {
+                const deptExists = await prisma.department.findUnique({
+                    where: { department_code: department }
+                });
+                if (!deptExists) {
+                    return res.status(400).json({ 
+                        error: `Department with code '${department}' not found. Please select a valid department.` 
+                    });
+                }
+            }
+
+            // Validate hostel exists if student is a hosteler
+            if (isHosteler === 'true' && hostelNo) {
+                const hostelExists = await prisma.hostel.findUnique({
+                    where: { hostel_no: hostelNo }
+                });
+                if (!hostelExists) {
+                    return res.status(400).json({ 
+                        error: `Hostel '${hostelNo}' not found. Please enter a valid hostel number.` 
+                    });
+                }
+            }
+
+            // Create student with all form data
+            student = await prisma.student.create({
+                data: {
+                    student_id,
+                    name: studentName,
+                    email,
+                    password: "defaultPassword123", // TODO: Implement proper password handling
+                    course,
+                    admission_date: new Date(),
+                    department_code: department || null,
+                    hostel_no: (isHosteler === 'true' && hostelNo) ? hostelNo : null,
+                    // Additional form fields
+                    scholar_no: scholarNo,
+                    branch: branch || null,
+                    degree: degree || null,
+                    mobile_no: mobileNo || null,
+                    room_no: roomNo || null,
+                    cgpa: cgpa ? parseFloat(cgpa) : null,
+                    aadhar_passport: aadharPassport || null,
+                    address: address || null,
+                    bank_account_no: bankAccountNo || null,
+                    ifsc_code: ifscCode || null,
+                    is_hosteler: isHosteler === 'true',
+                    profile_picture: profilePicture ? profilePicture.filename : null,
+                    documents: documents.length > 0 ? documents.map(doc => ({
+                        filename: doc.filename,
+                        originalname: doc.originalname,
+                        size: doc.size,
+                        mimetype: doc.mimetype
+                    })) : null
+                }
+            });
+        } else {
+            // Update existing student with new form data if needed
+            student = await prisma.student.update({
+                where: { student_id },
+                data: {
+                    name: studentName,
+                    email,
+                    course,
+                    department_code: department || null,
+                    hostel_no: (isHosteler === 'true' && hostelNo) ? hostelNo : null,
+                    // Update additional form fields
+                    scholar_no: scholarNo,
+                    branch: branch || null,
+                    degree: degree || null,
+                    mobile_no: mobileNo || null,
+                    room_no: roomNo || null,
+                    cgpa: cgpa ? parseFloat(cgpa) : null,
+                    aadhar_passport: aadharPassport || null,
+                    address: address || null,
+                    bank_account_no: bankAccountNo || null,
+                    ifsc_code: ifscCode || null,
+                    is_hosteler: isHosteler === 'true',
+                    profile_picture: profilePicture ? profilePicture.filename : null,
+                    documents: documents.length > 0 ? documents.map(doc => ({
+                        filename: doc.filename,
+                        originalname: doc.originalname,
+                        size: doc.size,
+                        mimetype: doc.mimetype
+                    })) : student.documents // keep existing if no new documents
+                }
+            });
+        }
+
+        // Step 3: Check if student already has an active request
         const existingRequest = await prisma.noDuesRequest.findFirst({
             where: {
                 student_id,
@@ -34,11 +152,12 @@ export const submitNoDuesForm = async (req, res) => {
             return res.status(400).json({ error: "Active request already exists" });
         }
 
-        // Step 3: Create new request with tracks
+        // Step 4: Create new request with tracks
         const request = await prisma.noDuesRequest.create({
             data: {
                 student: { connect: { student_id } },
-                admin: { connect: { admin_id: admin.admin_id } }, // auto-linked admin dept
+                admin: { connect: { admin_id: admin.admin_id } },
+                reason: reason || null,
                 tracks: {
                     create: [
                         { unit_type: "Department", step_number: 1 },
@@ -50,18 +169,43 @@ export const submitNoDuesForm = async (req, res) => {
                     ]
                 }
             },
-            include: { tracks: true }
+            include: { 
+                tracks: true,
+                student: {
+                    include: {
+                        department: true,
+                        hostel: true
+                    }
+                }
+            }
         });
 
-        // Step 4: Success response
+        // Step 5: Success response
         res.status(201).json({
             message: "No dues form submitted successfully",
-            request
+            request,
+            studentDetails: {
+                student_id,
+                name: studentName,
+                email,
+                course,
+                department,
+                hostel: isHosteler === 'true' ? hostelNo : null,
+                scholar_no: scholarNo,
+                cgpa: cgpa ? parseFloat(cgpa) : null
+            },
+            uploadedFiles: {
+                profilePicture: profilePicture?.filename,
+                documents: documents.map(d => d.filename)
+            }
         });
 
     } catch (error) {
         console.error("Error in submitNoDuesForm:", error);
-        res.status(500).json({ error: "Failed to submit no dues form" });
+        res.status(500).json({ 
+            error: "Failed to submit no dues form",
+            details: error.message 
+        });
     }
 };
 

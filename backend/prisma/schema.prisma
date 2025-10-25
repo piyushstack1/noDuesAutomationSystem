@@ -47,6 +47,21 @@ model Student {
   department_code String?
   hostel_no       String?
   request_id      Int?      @unique // ek hi request per student
+  
+  // Additional form fields
+  scholar_no      String?
+  branch          String?
+  degree          String?
+  mobile_no       String?
+  room_no         String?
+  cgpa            Float?
+  aadhar_passport String?
+  address         String?
+  bank_account_no String?
+  ifsc_code       String?
+  is_hosteler     Boolean   @default(true)
+  profile_picture String? // filename
+  documents       Json? // array of document filenames
 
   department Department?    @relation(fields: [department_code], references: [department_code])
   hostel     Hostel?        @relation(fields: [hostel_no], references: [hostel_no])

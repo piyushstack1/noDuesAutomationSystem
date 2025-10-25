@@ -1,4 +1,5 @@
 import express from 'express';
+import upload from '../middleware/upload.js';
 import {
     submitNoDuesForm,
     getFormDetails,
@@ -18,8 +19,14 @@ const router = express.Router();
 router.post('/register', registerStudent);
 router.post('/login', loginStudent);
 
-// No Dues Form Routes
-router.post('/noduesform', submitNoDuesForm);
+// No Dues Form Routes - with file uploads
+router.post('/noduesform', 
+    upload.fields([
+        { name: 'profilePicture', maxCount: 1 },
+        { name: 'documents', maxCount: 10 }
+    ]), 
+    submitNoDuesForm
+);
 router.get('/noduesform/:studentId', getFormDetails);
 
 // Status and Tracking Routes
