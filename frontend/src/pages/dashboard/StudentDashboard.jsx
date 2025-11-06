@@ -10,21 +10,21 @@ export default function StudentDashboard() {
   const stats = [
     {
       title: "Total Applications",
-      value: "3",
+      value: "0",
       description: "Applications submitted",
       icon: FileText,
       color: "text-blue-600",
     },
     {
       title: "Pending",
-      value: "1",
+      value: "0",
       description: "Awaiting approval",
       icon: Clock,
       color: "text-yellow-600",
     },
     {
       title: "Approved",
-      value: "2",
+      value: "0",
       description: "Successfully cleared",
       icon: CheckCircle,
       color: "text-green-600",

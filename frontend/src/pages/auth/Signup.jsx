@@ -2,11 +2,9 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { GraduationCap, Shield, Building2 } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import logo from "@/images/logo.jpg"
 
 export default function Signup() {
@@ -15,40 +13,11 @@ export default function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    studentId: "",
-    role: "",
-    unit_type: "",
-    hostelName: "",
+    studentId: ""
   })
 
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-
-  const approvingUnits = [
-    { value: "department", label: "Department" },
-    { value: "hostel", label: "Hostel" },
-    { value: "library", label: "Library" },
-    { value: "accounts", label: "Accounts" },
-    { value: "sports", label: "Sports" },
-    { value: "proctor", label: "Proctor" },
-  ]
-
-  const hostelList = [
-    "Hostel 01",
-    "Hostel 02",
-    "Hostel 03",
-    "Hostel 04",
-    "Hostel 05",
-    "Hostel 06",
-    "Hostel 07",
-    "Hostel 08",
-    "Hostel 09",
-    "Hostel 10A",
-    "Hostel 10B",
-    "Hostel 10C",
-    "Hostel 11",
-    "Hostel 12",
-  ]
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -57,30 +26,13 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.role) {
-      alert("Please select a role")
-      return
-    }
 
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match")
       return
     }
 
-    if (formData.role === "student" && !formData.studentId) {
-      alert("Please enter your Student ID")
-      return
-    }
 
-    if (formData.role === "unit" && !formData.unit_type) {
-      alert("Please select an Approving Unit")
-      return
-    }
-
-    if (formData.unit_type === "hostel" && !formData.hostelName) {
-      alert("Please select which Hostel")
-      return
-    }
 
     setIsLoading(true)
 
@@ -108,30 +60,11 @@ export default function Signup() {
             <CardTitle className="text-2xl font-bold text-center">
               Create Account
             </CardTitle>
-            <CardDescription className="text-center">
-              Join NoDuesAutomation by selecting your role
-            </CardDescription>
+            
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Select Role */}
-              <div className="space-y-2">
-                <Label>Select Role</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => handleInputChange("role", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="unit">Approving Unit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Common Fields */}
               <div className="space-y-2">
@@ -183,7 +116,7 @@ export default function Signup() {
               </div>
 
               {/* Student Field */}
-              {formData.role === "student" && (
+              {true && (
                 <div className="space-y-2">
                   <Label htmlFor="studentId">Student ID</Label>
                   <Input
@@ -195,55 +128,6 @@ export default function Signup() {
                     required
                   />
                 </div>
-              )}
-
-              {/* Approving Unit Fields */}
-              {formData.role === "unit" && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Select Approving Unit</Label>
-                    <Select
-                      value={formData.unit_type}
-                      onValueChange={(value) => {
-                        handleInputChange("unit_type", value)
-                        handleInputChange("hostelName", "") // reset hostel when changing unit
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {approvingUnits.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Hostel-specific Field */}
-                  {formData.unit_type === "hostel" && (
-                    <div className="space-y-2">
-                      <Label>Select Hostel</Label>
-                      <Select
-                        value={formData.hostelName}
-                        onValueChange={(value) => handleInputChange("hostelName", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your hostel" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {hostelList.map((h) => (
-                            <SelectItem key={h} value={h}>
-                              {h}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </>
               )}
 
               {/* Submit Button */}

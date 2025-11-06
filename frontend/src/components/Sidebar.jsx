@@ -20,51 +20,55 @@ import {
   ShieldCheck,
   Trophy,
   MessageSquare,
+  Award,
 } from "lucide-react"
 
 const navigationItems = {
   student: [
-    { name: "Dashboard", href: "/student/dashboard", icon: Home },
-    { name: "Apply for No Dues", href: "/student/apply", icon: FileText },
-    { name: "Track Status", href: "/student/track", icon: Clock },
-    { name: "Queries", href: "/student/queries", icon: MessageSquare },
-    { name: "History", href: "/student/history", icon: FileText },
-    { name: "Profile", href: "/student/profile", icon: Settings },
+    { name: "Dashboard", href: "/dashboard/student/dashboard", icon: Home },
+    { name: "Apply for No Dues", href: "/dashboard/student/apply", icon: FileText },
+    { name: "Track Status", href: "/dashboard/student/track", icon: Clock },
+    { name: "Queries", href: "/dashboard/student/queries", icon: MessageSquare },
+    { name: "History", href: "/dashboard/student/history", icon: FileText },
+    { name: "Profile", href: "/dashboard/student/profile", icon: Settings },
   ],
   admin: [
-    { name: "Dashboard", href: "/admin/dashboard", icon: Home },
-    { name: "Pending Requests", href: "/admin/requests", icon: Clock },
-    { name: "Approved Applications", href: "/admin/approved", icon: CheckCircle },
-    { name: "Certificates", href: "/admin/certificates", icon: FileText },
-    { name: "Manage Students", href: "/admin/manage-students", icon: Users },
-    { name: "Manage Units", href: "/admin/manage-units", icon: Building2 },
+    { name: "Dashboard", href: "/dashboard/admin/dashboard", icon: Home },
+    { name: "Pending Requests", href: "/dashboard/admin/requests", icon: Clock },
+    { name: "Approved Applications", href: "/dashboard/admin/approved", icon: CheckCircle },
+    { name: "Certificates", href: "/dashboard/admin/certificates", icon: FileText },
+    { name: "Manage Students", href: "/dashboard/admin/manage-students", icon: Users },
+    { name: "Manage Units", href: "/dashboard/admin/manage-units", icon: Building2 },
   ],
   unit: [
-    { name: "Dashboard", href: "/unit/dashboard", icon: Home },
-    { name: "Pending Requests", href: "/unit/requests", icon: Clock },
-    { name: "Queries", href: "/unit/queries", icon: MessageSquare },
-    { name: "Profile", href: "/unit/profile", icon: Settings },
+    { name: "Dashboard", href: "/dashboard/unit/dashboard", icon: Home },
+    { name: "Pending Requests", href: "/dashboard/unit/requests", icon: Clock },
+    { name: "Queries", href: "/dashboard/unit/queries", icon: MessageSquare },
+    { name: "Profile", href: "/dashboard/unit/profile", icon: Settings },
   ],
 }
 
 const unitSpecificItems = {
   department: [
-    { name: "Department Clearance", href: "/unit/department", icon: Building },
+    { name: "Department Clearance", href: "/dashboard/unit/department", icon: Building },
   ],
   library: [
-    { name: "Library Clearance", href: "/unit/library", icon: BookOpen },
+    { name: "Library Clearance", href: "/dashboard/unit/library", icon: BookOpen },
   ],
   accounts: [
-    { name: "Accounts Clearance", href: "/unit/accounts", icon: CreditCard },
+    { name: "Accounts Clearance", href: "/dashboard/unit/accounts", icon: CreditCard },
   ],
   hostel: [
-    { name: "Hostel Clearance", href: "/unit/hostel", icon: Building },
+    { name: "Hostel Clearance", href: "/dashboard/unit/hostel", icon: Building },
   ],
   proctor: [
-    { name: "Proctor Clearance", href: "/unit/proctor", icon: ShieldCheck },
+    { name: "Proctor Clearance", href: "/dashboard/unit/proctor", icon: ShieldCheck },
   ],
   sports: [
-    { name: "Sports Clearance", href: "/unit/sports", icon: Trophy },
+    { name: "Sports Clearance", href: "/dashboard/unit/sports", icon: Trophy },
+  ],
+  ncc: [
+    { name: "NCC Clearance", href: "/dashboard/unit/ncc", icon: Award },
   ],
 }
 

@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import Login from "@/pages/auth/Login"
 import Signup from "@/pages/auth/Signup"
@@ -30,6 +30,10 @@ import UnitProfilePage from "@/pages/unit/UnitProfilePage"
 
 const router = createBrowserRouter([
   {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
+  {
     path: "/login",
     element: <Login />,
   },
@@ -42,7 +46,7 @@ const router = createBrowserRouter([
     element: <ForgotPassword />,
   },
   {
-    path: "/",
+    path: "/dashboard",
     element: (
       <ProtectedRoute>
         <DashboardLayout />
@@ -192,3 +196,5 @@ export default function AppRouter() {
     </motion.div>
   )
 }
+
+

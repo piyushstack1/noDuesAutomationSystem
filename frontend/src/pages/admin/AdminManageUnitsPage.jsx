@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Building2, Plus, Edit, Trash2, Search, Filter, Settings } from "lucide-react"
 import StatusBadge from "@/components/StatusBadge"
-import QueryModal from "@/components/QueryModal"
+import UnitFormModal from "@/components/UnitFormModal"
 import useNoDuesStore from "@/store/useNoDuesStore"
 
 export default function AdminManageUnitsPage() {
@@ -304,7 +304,7 @@ export default function AdminManageUnitsPage() {
       </Card>
 
       {/* Add Unit Modal */}
-      <QueryModal
+      <UnitFormModal
         isOpen={isAddModalOpen}
         onClose={() => {
           setIsAddModalOpen(false)
@@ -314,10 +314,11 @@ export default function AdminManageUnitsPage() {
         description="Enter the unit details below"
         submitLabel="Add Unit"
         onSubmit={handleAddUnit}
+        initialData={formData}
       />
 
       {/* Edit Unit Modal */}
-      <QueryModal
+      <UnitFormModal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false)
@@ -328,6 +329,7 @@ export default function AdminManageUnitsPage() {
         description="Update the unit details"
         submitLabel="Update Unit"
         onSubmit={handleEditUnit}
+        initialData={formData}
       />
     </div>
   )

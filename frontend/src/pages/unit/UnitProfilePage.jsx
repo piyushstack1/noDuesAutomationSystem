@@ -111,6 +111,7 @@ export default function UnitProfilePage() {
                       <SelectItem value="hostel">Hostel</SelectItem>
                       <SelectItem value="proctor">Proctor</SelectItem>
                       <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="ncc">NCC</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

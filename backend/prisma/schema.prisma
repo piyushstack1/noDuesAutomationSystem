@@ -1,4 +1,3 @@
-// Prisma schema for No Dues Automation
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,23 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Status enums
+enum RequestStatus {
+  PENDING
+  PROGRESS
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum QueryStatus {
+  PENDING
+  PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+enum DegreeType {
+  BTECH
+  MTECH
+  PHD
+  MSC
+  MCA
+  MBA
+  BARCH
+}
+
+enum UnitType {
+  DEPARTMENT
+  HOSTEL
+  LIBRARY
+  ACCOUNTS
+  SPORTS
+  PROCTOR
+  NCC
+}
+
+
 model Department {
-  department_code String    @id
   name            String
+  department_code String    @id
   head            String
   students        Student[]
 }
 
 model Hostel {
-  hostel_no String    @id
   name      String
+  hostel_no String    @id
   warden    String?
   students  Student[]
 }
 
 model CentralUnit {
   unit_id   Int    @id @default(autoincrement())
-  unit_type String @unique
+  unit_type UnitType @unique
 }
 
 model Admin {
@@ -32,41 +68,42 @@ model Admin {
   name      String
   email     String          @unique
   password  String
-  requests  NoDuesRequest[]
   approvals FinalApproval[]
+  requests  NoDuesRequest[]
 }
 
 model Student {
-  student_id      String    @id
+  student_id      String         @id
   name            String
-  email           String    @unique
-  password        String
-  course          String?
+  email           String         @unique
+  course          String
   admission_date  DateTime
-  passing_date    DateTime?
   department_code String?
   hostel_no       String?
-  request_id      Int?      @unique // ek hi request per student
-  
-  // Additional form fields
-  scholar_no      String?
-  branch          String?
-  degree          String?
-  mobile_no       String?
+  passing_date    DateTime?
+  password        String
+  request_id      Int?           @unique
+  aadhar_passport String
+  address         String
+  bank_account_no String
+  branch          String
+  cgpa            Float
+  degree          String
+  department      String
+  documents       Json
+  ifsc_code       String
+  is_hosteler     Boolean        @default(true)
+  mobile_no       String
+  profile_picture String
   room_no         String?
-  cgpa            Float?
-  aadhar_passport String?
-  address         String?
-  bank_account_no String?
-  ifsc_code       String?
-  is_hosteler     Boolean   @default(true)
-  profile_picture String? // filename
-  documents       Json? // array of document filenames
+  scholar_no      String         @unique
+  request         NoDuesRequest?
+  queries         Query[]
+  department_rel  Department?    @relation(fields: [department_code], references: [department_code])
+  hostel          Hostel?        @relation(fields: [hostel_no], references: [hostel_no])
 
-  department Department?    @relation(fields: [department_code], references: [department_code])
-  hostel     Hostel?        @relation(fields: [hostel_no], references: [hostel_no])
-  request    NoDuesRequest? // 👈 yaha fields/references hata diye
-  queries    Query[]
+  @@index([scholar_no])
+  @@index([email])
 }
 
 model Staff {
@@ -74,64 +111,76 @@ model Staff {
   name      String
   email     String
   password  String
-  unit_type String // Department / Hostel / Library / Accounts / Sports / Proctor
-  unit_id   String? // flexible, not strict FK
+  unit_type UnitType
+  unit_id   String?
   tracks    Track[]
 }
 
 model NoDuesRequest {
-  request_id   Int      @id @default(autoincrement())
-  status       String   @default("Pending")
-  submitted_at DateTime @default(now())
-  student_id   String   @unique // ek request = ek student
-  admin_id     Int
+  request_id          Int            @id @default(autoincrement())
+  status              RequestStatus  @default(PENDING)
+  submitted_at        DateTime       @default(now())
+  student_id          String         @unique
+  admin_id            Int
+  accounts_approval   Boolean        @default(false)
+  completed_at        DateTime?
+  department_approval Boolean        @default(false)
+  hostel_approval     Boolean        @default(false)
+  last_updated_at     DateTime       @updatedAt
+  library_approval    Boolean        @default(false)
+  proctor_approval    Boolean        @default(false)
+  ncc_approval        Boolean        @default(false)
+  reason              String?
+  remarks             String?
+  required_docs       Json
+  sports_approval     Boolean        @default(false)
+  submitted_docs      Json
+  final               FinalApproval?
+  admin               Admin          @relation(fields: [admin_id], references: [admin_id])
+  student             Student        @relation(fields: [student_id], references: [student_id])
+  queries             Query[]
+  tracks              Track[]
 
-  student Student        @relation(fields: [student_id], references: [student_id])
-  admin   Admin          @relation(fields: [admin_id], references: [admin_id])
-  tracks  Track[]
-  final   FinalApproval?
-  queries Query[] // 👈 missing opposite relation added
+  @@index([status])
+  @@index([submitted_at])
 }
 
 model Query {
-  query_id       Int       @id @default(autoincrement())
+  query_id       Int           @id @default(autoincrement())
   student_id     String
   request_id     Int
-  track_id       Int? // 👈 ab field define kar diya
+  track_id       Int?
   approving_unit String
   remarks        String
-  status         String    @default("Pending")
-  created_at     DateTime  @default(now())
+  status         QueryStatus   @default(PENDING)
+  created_at     DateTime      @default(now())
   resolved_at    DateTime?
-
-  student Student       @relation(fields: [student_id], references: [student_id])
-  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
-  track   Track?        @relation(fields: [track_id], references: [track_id]) // ab valid hai
+  request        NoDuesRequest @relation(fields: [request_id], references: [request_id])
+  student        Student       @relation(fields: [student_id], references: [student_id])
+  track          Track?        @relation(fields: [track_id], references: [track_id])
 }
 
 model Track {
-  track_id    Int      @id @default(autoincrement())
-  unit_type   String
+  track_id    Int           @id @default(autoincrement())
   unit_id     String?
-  step_number Int
-  status      String   @default("Pending")
   remarks     String?
-  updated_at  DateTime @default(now())
+  updated_at  DateTime      @default(now())
   request_id  Int
   staff_id    Int?
-
-  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
-  staff   Staff?        @relation(fields: [staff_id], references: [staff_id])
-  queries Query[] // 👈 now properly opposite of Query.track
+  step_number Int
+  unit_type   UnitType
+  status      RequestStatus @default(PENDING)
+  queries     Query[]
+  request     NoDuesRequest @relation(fields: [request_id], references: [request_id])
+  staff       Staff?        @relation(fields: [staff_id], references: [staff_id])
 }
 
 model FinalApproval {
-  approval_id  Int      @id @default(autoincrement())
-  final_status String   @default("Pending")
-  issued_at    DateTime @default(now())
-  request_id   Int      @unique
+  approval_id  Int           @id @default(autoincrement())
   admin_id     Int
-
-  request NoDuesRequest @relation(fields: [request_id], references: [request_id])
-  admin   Admin         @relation(fields: [admin_id], references: [admin_id])
+  issued_at    DateTime      @default(now())
+  request_id   Int           @unique
+  final_status RequestStatus @default(PENDING)
+  admin        Admin         @relation(fields: [admin_id], references: [admin_id])
+  request      NoDuesRequest @relation(fields: [request_id], references: [request_id])
 }

@@ -535,7 +535,8 @@ export default function ApplyPage() {
                     "Library Clearance",
                     "Hostel Clearance",
                     "Lab Clearance",
-                    "Sports Clearance"
+                    "Sports Clearance",
+                    "NCC Clearance"
                   ].map((doc) => (
                     <div key={doc} className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />

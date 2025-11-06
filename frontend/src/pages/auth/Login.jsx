@@ -40,7 +40,8 @@ export default function Login() {
     { value: "library", label: "Library" },
     { value: "accounts", label: "Accounts" },
     { value: "sports", label: "Sports" },
-    { value: "proctor", label: "Proctor" }
+    { value: "proctor", label: "Proctor" },
+    { value: "ncc", label: "NCC" }
   ]
 
   const handleSubmit = async (e) => {
@@ -63,7 +64,8 @@ export default function Login() {
       }
       
       login(userData)
-      navigate(`/${formData.role}/dashboard`)
+      navigate(`/dashboard/${formData.role}/dashboard`)
+      console.log("Logged in user data:", userData)
       setIsLoading(false)
     }, 1000)
   }
