@@ -15,7 +15,7 @@ import Loader from "@/components/Loader"
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
     studentName: "",
-    scholarNo: "",
+    student_id: "",
     department: "",
     branch: "",
     degree: "",
@@ -48,7 +48,7 @@ export default function ApplyPage() {
 
     try {
       // Validate required fields
-      if (!formData.studentName || !formData.scholarNo || !formData.email || !formData.course) {
+      if (!formData.studentName || !formData.student_id || !formData.email || !formData.course) {
         toast.error("Please fill all required fields", { id: loadingToast })
         setIsLoading(false)
         return
@@ -63,10 +63,9 @@ export default function ApplyPage() {
       // Create FormData for multipart/form-data
       const submitData = new FormData()
       
-      // Add student_id (using scholarNo as student_id)
-      submitData.append('student_id', formData.scholarNo)
+      // Add form data
+      submitData.append('student_id', formData.student_id)
       submitData.append('studentName', formData.studentName)
-      submitData.append('scholarNo', formData.scholarNo)
       submitData.append('department', formData.department)
       submitData.append('branch', formData.branch)
       submitData.append('degree', formData.degree)
@@ -237,12 +236,12 @@ export default function ApplyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="scholarNo">Scholar No. *</Label>
+                    <Label htmlFor="student_id">Student ID *</Label>
                     <Input
-                      id="scholarNo"
-                      placeholder="Enter your scholar number"
-                      value={formData.scholarNo}
-                      onChange={(e) => handleInputChange("scholarNo", e.target.value)}
+                      id="student_id"
+                      placeholder="Enter your student ID"
+                      value={formData.student_id}
+                      onChange={(e) => handleInputChange("student_id", e.target.value)}
                       required
                     />
                   </div>
@@ -462,6 +461,10 @@ export default function ApplyPage() {
                   </div>
                 </div>
               </div>
+
+              {/* reason section */}
+
+
 
 
               {/* Documents Upload Section */}

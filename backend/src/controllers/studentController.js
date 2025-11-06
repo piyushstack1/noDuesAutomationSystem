@@ -4,23 +4,22 @@ import prisma from "../../prisma/index.js";
 export const submitNoDuesForm = async (req, res) => {
     try {
         const {
-            student_id,
             studentName,
-            scholarNo,
+            student_id,
+            email,
+            mobileNo,
+            aadharPassport,
+            address,
             department,
             branch,
             degree,
             course,
-            mobileNo,
-            email,
+            cgpa,
+            isHosteler,
             hostelNo,
             roomNo,
-            cgpa,
-            aadharPassport,
-            address,
             bankAccountNo,
             ifscCode,
-            isHosteler,
             reason
         } = req.body;
 
@@ -28,11 +27,36 @@ export const submitNoDuesForm = async (req, res) => {
         const profilePicture = req.files?.profilePicture?.[0];
         const documents = req.files?.documents || [];
 
-        // Validate required fields
-        if (!student_id || !studentName || !email || !course) {
+        // input validation
+        if (!student_id || !studentName || !email || !course || !mobileNo || !isHosteler || (isHosteler === 'true' && !hostelNo) || (isHosteler === 'true' && !roomNo) || !aadharPassport
+            || !branch || !degree || !cgpa || !address || !bankAccountNo || !ifscCode || !course || !reason) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
+        // Validate uploaded files
+        if (!documents || documents.length === 0) {
+            return res.status(400).json({ error: "Upload required documents" });
+        }
+
+        //Validate file types and sizes
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        const invalidFile = documents.find(file => {
+            if (!allowedTypes.includes(file.mimetype)) {
+                return true;
+            }
+            if (file.size > maxSize) {
+                return true;
+            }
+            return false;
+        });
+
+        if (invalidFile) {
+            return res.status(400).json({
+                error: "Invalid file(s). Only PDF, JPEG, and PNG files up to 5MB are allowed."
+            });
+        }
         // Step 1: Find the Admin
         const admin = await prisma.admin.findFirst();
 
@@ -40,110 +64,74 @@ export const submitNoDuesForm = async (req, res) => {
             return res.status(500).json({ error: "Admin not found in the system" });
         }
 
-        // Step 2: Check if student exists, if not create
+        // Validate department exists if provided
+        if (department) {
+            const deptExists = await prisma.department.findUnique({
+                where: { department_code: department }
+            });
+            if (!deptExists) {
+                return res.status(400).json({
+                    error: `Department with code '${department}' not found. Please select a valid department.`
+                });
+            }
+        }
+
+        // Validate hostel exists if student is a hosteler
+        if (isHosteler === 'true' && hostelNo) {
+            const hostelExists = await prisma.hostel.findUnique({
+                where: { hostel_no: hostelNo }
+            });
+            if (!hostelExists) {
+                return res.status(400).json({
+                    error: `Hostel '${hostelNo}' not found. Please enter a valid hostel number.`
+                });
+            }
+        }
+
+        // Find existing student first
         let student = await prisma.student.findUnique({
             where: { student_id }
         });
 
         if (!student) {
-            // Validate department exists if provided
-            if (department) {
-                const deptExists = await prisma.department.findUnique({
-                    where: { department_code: department }
-                });
-                if (!deptExists) {
-                    return res.status(400).json({ 
-                        error: `Department with code '${department}' not found. Please select a valid department.` 
-                    });
-                }
-            }
-
-            // Validate hostel exists if student is a hosteler
-            if (isHosteler === 'true' && hostelNo) {
-                const hostelExists = await prisma.hostel.findUnique({
-                    where: { hostel_no: hostelNo }
-                });
-                if (!hostelExists) {
-                    return res.status(400).json({ 
-                        error: `Hostel '${hostelNo}' not found. Please enter a valid hostel number.` 
-                    });
-                }
-            }
-
-            // Create student with all form data
-            student = await prisma.student.create({
-                data: {
-                    student_id,
-                    name: studentName,
-                    email,
-                    password: "defaultPassword123", // TODO: Implement proper password handling
-                    course,
-                    admission_date: new Date(),
-                    department_code: department || null,
-                    hostel_no: (isHosteler === 'true' && hostelNo) ? hostelNo : null,
-                    // Additional form fields
-                    scholar_no: scholarNo,
-                    branch: branch || null,
-                    degree: degree || null,
-                    mobile_no: mobileNo || null,
-                    room_no: roomNo || null,
-                    cgpa: cgpa ? parseFloat(cgpa) : null,
-                    aadhar_passport: aadharPassport || null,
-                    address: address || null,
-                    bank_account_no: bankAccountNo || null,
-                    ifsc_code: ifscCode || null,
-                    is_hosteler: isHosteler === 'true',
-                    profile_picture: profilePicture ? profilePicture.filename : null,
-                    documents: documents.length > 0 ? documents.map(doc => ({
-                        filename: doc.filename,
-                        originalname: doc.originalname,
-                        size: doc.size,
-                        mimetype: doc.mimetype
-                    })) : null
-                }
-            });
-        } else {
-            // Update existing student with new form data if needed
-            student = await prisma.student.update({
-                where: { student_id },
-                data: {
-                    name: studentName,
-                    email,
-                    course,
-                    department_code: department || null,
-                    hostel_no: (isHosteler === 'true' && hostelNo) ? hostelNo : null,
-                    // Update additional form fields
-                    scholar_no: scholarNo,
-                    branch: branch || null,
-                    degree: degree || null,
-                    mobile_no: mobileNo || null,
-                    room_no: roomNo || null,
-                    cgpa: cgpa ? parseFloat(cgpa) : null,
-                    aadhar_passport: aadharPassport || null,
-                    address: address || null,
-                    bank_account_no: bankAccountNo || null,
-                    ifsc_code: ifscCode || null,
-                    is_hosteler: isHosteler === 'true',
-                    profile_picture: profilePicture ? profilePicture.filename : null,
-                    documents: documents.length > 0 ? documents.map(doc => ({
-                        filename: doc.filename,
-                        originalname: doc.originalname,
-                        size: doc.size,
-                        mimetype: doc.mimetype
-                    })) : student.documents // keep existing if no new documents
-                }
-            });
+            return res.status(404).json({ error: "Student not found" });
         }
+
+        // Update student details
+        student = await prisma.student.update({
+            where: { student_id },
+            data: {
+                name: studentName,
+                email,
+                course,
+                department_code: department || null,
+                hostel_no: (isHosteler === 'true' && hostelNo) ? hostelNo : null,
+                branch: branch || null,
+                degree: degree || null,
+                mobile_no: mobileNo || null,
+                room_no: roomNo || null,
+                cgpa: cgpa ? parseFloat(cgpa) : null,
+                aadhar_passport: aadharPassport || null,
+                address: address || null,
+                bank_account_no: bankAccountNo || null,
+                ifsc_code: ifscCode || null,
+                is_hosteler: isHosteler === 'true',
+                profile_picture: profilePicture ? profilePicture.filename : null,
+                documents: documents.length > 0 ? documents.map(doc => ({
+                    filename: doc.filename,
+                    originalname: doc.originalname,
+                    size: doc.size,
+                    mimetype: doc.mimetype
+                })) : student.documents // keep existing if no new documents
+            }
+        });
 
         // Step 3: Check if student already has an active request
         const existingRequest = await prisma.noDuesRequest.findFirst({
             where: {
                 student_id,
-                NOT: {
-                    OR: [
-                        { status: "Rejected" },
-                        { status: "Completed" }
-                    ]
+                status: {
+                    notIn: ['REJECTED', 'CANCELLED']
                 }
             }
         });
@@ -160,16 +148,23 @@ export const submitNoDuesForm = async (req, res) => {
                 reason: reason || null,
                 tracks: {
                     create: [
-                        { unit_type: "Department", step_number: 1 },
-                        { unit_type: "Hostel", step_number: 2 },
-                        { unit_type: "Library", step_number: 3 },
-                        { unit_type: "Accounts", step_number: 4 },
-                        { unit_type: "Sports", step_number: 5 },
-                        { unit_type: "Proctor", step_number: 6 }
-                    ]
+                        { unit_type: "DEPARTMENT", step_number: 1 },
+                        { unit_type: "HOSTEL", step_number: 2 },
+                        { unit_type: "LIBRARY", step_number: 3 },
+                        { unit_type: "ACCOUNTS", step_number: 4 },
+                        { unit_type: "SPORTS", step_number: 5 },
+                        { unit_type: "PROCTOR", step_number: 6 },
+                        { unit_type: "NCC", step_number: 7 }
+                    ].filter(track => {
+                        // Only include hostel track if student is a hosteler
+                        if (track.unit_type === "HOSTEL") {
+                            return isHosteler === 'true';
+                        }
+                        return true;
+                    })
                 }
             },
-            include: { 
+            include: {
                 tracks: true,
                 student: {
                     include: {
@@ -191,7 +186,6 @@ export const submitNoDuesForm = async (req, res) => {
                 course,
                 department,
                 hostel: isHosteler === 'true' ? hostelNo : null,
-                scholar_no: scholarNo,
                 cgpa: cgpa ? parseFloat(cgpa) : null
             },
             uploadedFiles: {
@@ -202,9 +196,9 @@ export const submitNoDuesForm = async (req, res) => {
 
     } catch (error) {
         console.error("Error in submitNoDuesForm:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to submit no dues form",
-            details: error.message 
+            details: error.message
         });
     }
 };
@@ -431,52 +425,3 @@ export const getRequestHistory = async (req, res) => {
     }
 };
 
-// Student Authentication
-export const loginStudent = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        
-        const student = await prisma.student.findUnique({
-            where: { email },
-            include: {
-                department: true,
-                hostel: true
-            }
-        });
-        
-        if (!student || student.password !== password) { // Note: In production, use proper password hashing
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        
-        res.json({ message: 'Login successful', student });
-    } catch (error) {
-        res.status(500).json({ error: 'Login failed' });
-    }
-};
-
-export const registerStudent = async (req, res) => {
-    try {
-        const { student_id, name, email, password, course, admission_date, department_code, hostel_no } = req.body;
-        
-        const student = await prisma.student.create({
-            data: {
-                student_id,
-                name,
-                email,
-                password, // Note: In production, hash the password
-                course,
-                admission_date: new Date(admission_date),
-                department_code,
-                hostel_no
-            }
-        });
-        
-        res.status(201).json({ message: 'Student registered successfully', student });
-    } catch (error) {
-        if (error.code === 'P2002') {
-            res.status(400).json({ error: 'Email or Student ID already exists' });
-        } else {
-            res.status(500).json({ error: 'Failed to register student' });
-        }
-    }
-};

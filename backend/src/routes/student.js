@@ -9,15 +9,10 @@ import {
     getProgressTracker,
     getFinalStatus,
     getRequestHistory,
-    loginStudent,
-    registerStudent
 } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-// Auth Routes
-router.post('/register', registerStudent);
-router.post('/login', loginStudent);
 
 // No Dues Form Routes - with file uploads
 router.post('/noduesform', 

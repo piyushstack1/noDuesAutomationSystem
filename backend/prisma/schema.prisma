@@ -76,33 +76,32 @@ model Student {
   student_id      String         @id
   name            String
   email           String         @unique
-  course          String
-  admission_date  DateTime
+  course          String?
+  admission_date  DateTime?
   department_code String?
   hostel_no       String?
   passing_date    DateTime?
   password        String
   request_id      Int?           @unique
-  aadhar_passport String
-  address         String
-  bank_account_no String
-  branch          String
-  cgpa            Float
-  degree          String
-  department      String
-  documents       Json
-  ifsc_code       String
-  is_hosteler     Boolean        @default(true)
-  mobile_no       String
-  profile_picture String
+  aadhar_passport String?
+  address         String?
+  bank_account_no String?
+  branch          String?
+  cgpa            Float?
+  degree          String?
+  department      String?
+  documents       Json?
+  ifsc_code       String?
+  is_hosteler     Boolean?        @default(true)
+  mobile_no       String?
+  profile_picture String?
   room_no         String?
-  scholar_no      String         @unique
   request         NoDuesRequest?
   queries         Query[]
   department_rel  Department?    @relation(fields: [department_code], references: [department_code])
   hostel          Hostel?        @relation(fields: [hostel_no], references: [hostel_no])
 
-  @@index([scholar_no])
+  @@index([student_id])
   @@index([email])
 }
 
