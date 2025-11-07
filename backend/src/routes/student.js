@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 
 
-// No Dues Form Routes - with file uploads
+// No Dues Form Routes
 router.post('/noduesform', 
     upload.fields([
         { name: 'profilePicture', maxCount: 1 },
@@ -31,7 +31,7 @@ router.post('/resolveQuery/:studentId/:approvingUnitId', resolveQuery);
 router.get('/tracker/:studentId', getProgressTracker);
 router.get('/finalStatus/:studentId', getFinalStatus);
 
-// History Route (Optional)
+// History Route
 router.get('/history/:studentId', getRequestHistory);
 
 

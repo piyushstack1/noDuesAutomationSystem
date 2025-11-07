@@ -62,7 +62,7 @@ export default function ApplyPage() {
 
       // Create FormData for multipart/form-data
       const submitData = new FormData()
-      
+
       // Add form data
       submitData.append('student_id', formData.student_id)
       submitData.append('studentName', formData.studentName)
@@ -81,12 +81,12 @@ export default function ApplyPage() {
       submitData.append('ifscCode', formData.ifscCode)
       submitData.append('isHosteler', formData.isHosteler)
       submitData.append('reason', formData.reason)
-      
+
       // Add profile picture
       if (formData.profilePicture) {
         submitData.append('profilePicture', formData.profilePicture)
       }
-      
+
       // Add documents
       formData.documents.forEach((doc) => {
         submitData.append('documents', doc)
@@ -103,35 +103,35 @@ export default function ApplyPage() {
       if (!response.ok) {
         // Handle specific error types
         const errorMessage = data.error || data.message || 'Failed to submit application'
-        
+
         if (errorMessage.includes('Department')) {
-          toast.error(`❌ ${errorMessage}\n\nPlease select a valid department from the dropdown.`, { 
+          toast.error(`❌ ${errorMessage}\n\nPlease select a valid department from the dropdown.`, {
             id: loadingToast,
-            duration: 5000 
+            duration: 5000
           })
         } else if (errorMessage.includes('Hostel')) {
-          toast.error(`❌ ${errorMessage}\n\nPlease enter a valid hostel number (H1, H2, or H3).`, { 
+          toast.error(`❌ ${errorMessage}\n\nPlease enter a valid hostel number (H1, H2, or H3).`, {
             id: loadingToast,
-            duration: 5000 
+            duration: 5000
           })
         } else if (errorMessage.includes('already exists')) {
-          toast.error(`❌ ${errorMessage}\n\nYou already have an active request.`, { 
+          toast.error(`❌ ${errorMessage}\n\nYou already have an active request.`, {
             id: loadingToast,
-            duration: 5000 
+            duration: 5000
           })
         } else {
-          toast.error(`❌ ${errorMessage}`, { 
+          toast.error(`❌ ${errorMessage}`, {
             id: loadingToast,
-            duration: 4000 
+            duration: 4000
           })
         }
-        
+
         throw new Error(errorMessage)
       }
 
       // Success
       toast.success("Application submitted successfully! 🎉", { id: loadingToast })
-      
+
       addNotification({
         title: "Application Submitted",
         message: "Your no-dues application has been submitted successfully",
@@ -145,17 +145,17 @@ export default function ApplyPage() {
 
     } catch (error) {
       console.error("Submission error:", error)
-      
+
       // Only show error notification if toast hasn't already been updated
-      if (!error.message?.includes('Department') && 
-          !error.message?.includes('Hostel') && 
-          !error.message?.includes('already exists')) {
-        toast.error(error.message || "Failed to submit application. Please try again.", { 
+      if (!error.message?.includes('Department') &&
+        !error.message?.includes('Hostel') &&
+        !error.message?.includes('already exists')) {
+        toast.error(error.message || "Failed to submit application. Please try again.", {
           id: loadingToast,
-          duration: 4000 
+          duration: 4000
         })
       }
-      
+
       addNotification({
         title: "Submission Failed",
         message: error.message || "Failed to submit application. Please try again.",
@@ -463,7 +463,17 @@ export default function ApplyPage() {
               </div>
 
               {/* reason section */}
-
+              <div className="space-y-2">
+                <Label htmlFor="reason">Reason for No Dues</Label>
+                <textarea
+                  id="reason"
+                  placeholder="Briefly describe why you need no-dues clearance..."
+                  value={formData.reason}
+                  onChange={(e) => handleInputChange("reason", e.target.value)}
+                  className="w-full min-h-[100px] px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  required
+                />
+              </div>
 
 
 

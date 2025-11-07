@@ -207,6 +207,22 @@ export const submitNoDuesForm = async (req, res) => {
 export const getFormDetails = async (req, res) => {
     try {
         const { studentId } = req.params;
+        if (!studentId) {
+            return res.status(400).json({success : false , error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {  
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
+
 
         const formDetails = await prisma.noDuesRequest.findFirst({
             where: { student_id: studentId },
@@ -233,9 +249,9 @@ export const getFormDetails = async (req, res) => {
             return res.status(404).json({ error: 'No dues form not found' });
         }
 
-        res.json(formDetails);
+        return res.status(200).json({ success: true, formDetails });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch form details' });
+        res.status(500).json({ success : false, error: 'Failed to fetch form details' });
     }
 };
 
@@ -243,6 +259,22 @@ export const getFormDetails = async (req, res) => {
 export const getApprovalStatus = async (req, res) => {
     try {
         const { studentId } = req.params;
+
+        if (!studentId) {
+            return res.status(400).json({ error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {  
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
 
         const tracks = await prisma.track.findMany({
             where: {
@@ -269,9 +301,9 @@ export const getApprovalStatus = async (req, res) => {
             status: track.queries.length > 0 ? 'QueryRaised' : track.status
         }));
 
-        res.json(statuses);
+        res.status(200).json({success: true, statuses});
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch approval status' });
+        res.status(500).json({ success: false , error: 'Failed to fetch approval status' });
     }
 };
 
@@ -279,6 +311,22 @@ export const getApprovalStatus = async (req, res) => {
 export const getQueries = async (req, res) => {
     try {
         const { studentId } = req.params;
+
+        if (!studentId) {
+            return res.status(400).json({ error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {  
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
 
         const queries = await prisma.query.findMany({
             where: {
@@ -297,7 +345,7 @@ export const getQueries = async (req, res) => {
             }
         });
 
-        res.json(queries);
+        res.status(200).json({success : true , queries});
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch queries' });
     }
@@ -308,6 +356,10 @@ export const resolveQuery = async (req, res) => {
     try {
         const { studentId, approvingUnitId } = req.params;
         const { queryId, response } = req.body;
+
+        if(!studentId || !approvingUnitId || !queryId || !response) {
+            return res.status(400).json({ success: false, error: 'Missing required fields' });
+        }
 
         const updatedQuery = await prisma.query.update({
             where: {
@@ -322,7 +374,7 @@ export const resolveQuery = async (req, res) => {
             }
         });
 
-        res.json({ message: 'Query resolved successfully', query: updatedQuery });
+        res.status(200).json({ message: 'Query resolved successfully', query: updatedQuery });
     } catch (error) {
         res.status(500).json({ error: 'Failed to resolve query' });
     }
@@ -332,6 +384,22 @@ export const resolveQuery = async (req, res) => {
 export const getProgressTracker = async (req, res) => {
     try {
         const { studentId } = req.params;
+
+        if (!studentId) {
+            return res.status(400).json({ success : false , error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {  
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
 
         const tracks = await prisma.track.findMany({
             where: {
@@ -346,7 +414,8 @@ export const getProgressTracker = async (req, res) => {
         const approvedUnits = tracks.filter(track => track.status === 'Approved').length;
         const progressPercentage = totalUnits > 0 ? Math.round((approvedUnits / totalUnits) * 100) : 0;
 
-        res.json({
+        res.status(200).json({
+            success: true,
             totalUnits,
             approvedUnits,
             progressPercentage,
@@ -362,6 +431,22 @@ export const getFinalStatus = async (req, res) => {
     try {
         const { studentId } = req.params;
 
+        if (!studentId) {
+            return res.status(400).json({ success : false , error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
+
         const request = await prisma.noDuesRequest.findFirst({
             where: { student_id: studentId },
             include: {
@@ -374,7 +459,7 @@ export const getFinalStatus = async (req, res) => {
         });
 
         if (!request) {
-            return res.status(404).json({ error: 'No request found' });
+            return res.status(404).json({ success:false , error: 'No request found' });
         }
 
         let status = 'Pending';
@@ -386,7 +471,7 @@ export const getFinalStatus = async (req, res) => {
             status = 'In-Progress';
         }
 
-        res.json({ status });
+        res.status(200).json({ success : true , status: status , issuedAt: request.final?.issued_at || null });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch final status' });
     }
@@ -396,6 +481,22 @@ export const getFinalStatus = async (req, res) => {
 export const getRequestHistory = async (req, res) => {
     try {
         const { studentId } = req.params;
+
+        if (!studentId) {
+            return res.status(400).json({ success : false , error: 'Student ID is required' });
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { student_id: studentId },
+            include: {
+                department: true,
+                hostel: true
+            }
+        });
+
+        if (!student) {
+            return res.status(404).json({ success : false , error: 'Student with this id not found' });
+        }
 
         const history = await prisma.noDuesRequest.findMany({
             where: { student_id: studentId },
@@ -419,9 +520,13 @@ export const getRequestHistory = async (req, res) => {
             }
         });
 
-        res.json(history);
+        if (history.length === 0) {
+            return res.status(404).json({ success : false , error: 'No request history found' });
+        }
+
+        res.status(200).json({success:true , history});
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch request history' });
+        res.status(500).json({ success:false ,error: 'Failed to fetch request history' });
     }
 };
 
