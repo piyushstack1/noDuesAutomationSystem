@@ -1,4 +1,4 @@
-import prisma from "../../prisma/index.js";
+import prisma from "../prisma/index.js";
 
 // Submit No Dues Form with complete student details
 export const submitNoDuesForm = async (req, res) => {

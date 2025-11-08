@@ -1,4 +1,4 @@
-import prisma from './prisma/index.js';
+import prisma from './src/prisma/index.js';
 
 async function seed() {
   try {
@@ -37,7 +37,7 @@ async function seed() {
       
       if (!exists) {
         await prisma.department.create({ data: dept });
-        console.log(`✅ Department created: ${dept.name}`);
+        console.log(`Department created: ${dept.name}`);
       }
     }
 
@@ -55,7 +55,7 @@ async function seed() {
       
       if (!exists) {
         await prisma.hostel.create({ data: hostel });
-        console.log(`✅ Hostel created: ${hostel.name}`);
+        console.log(`Hostel created: ${hostel.name}`);
       }
     }
 

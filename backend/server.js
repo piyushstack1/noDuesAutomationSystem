@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import prisma from './prisma/index.js';
+import prisma from './src/prisma/index.js';
 import studentRoutes from './src/routes/student.js';
 import authRoutes from './src/routes/auth.js';
-//import adminRoutes from './src/routes/admin.js';
+import adminRoutes from './src/routes/admin.js';
 //import unitRoutes from './src/routes/units.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/student', studentRoutes);
 app.use('/api/auth', authRoutes);
-//app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 //app.use('/api/units', unitRoutes);
 
 // Health check route
