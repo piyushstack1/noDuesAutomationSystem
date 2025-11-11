@@ -8,7 +8,7 @@ import prisma from './src/prisma/index.js';
 import studentRoutes from './src/routes/student.js';
 import authRoutes from './src/routes/auth.js';
 import adminRoutes from './src/routes/admin.js';
-//import unitRoutes from './src/routes/units.js';
+import unitRoutes from './src/routes/units.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,7 +29,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/student', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-//app.use('/api/units', unitRoutes);
+app.use('/api/approvingUnit', unitRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
